@@ -31,6 +31,10 @@ public class Wallet {
     @JoinColumn(name = "user_id")
     private User users;
 
+
+    public Wallet (){
+
+    }
     public Wallet(BigDecimal balance, Long points, LocalDateTime lastUpdate, User users) {
         this.balance = balance;
         this.points = points;

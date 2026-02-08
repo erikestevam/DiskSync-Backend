@@ -3,7 +3,7 @@ package com.br.integration.domain.service;
 import com.br.integration.domain.entites.User;
 import com.br.integration.domain.entites.Wallet;
 import com.br.integration.domain.repository.UserRepository;
-import com.br.integration.domain.Exception.UsersExcption.UserAlreadyExistsException;
+import com.br.integration.domain.exception.userexception.UserException;
 import com.br.integration.domain.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -33,19 +33,20 @@ public class UserService implements UserDetailsService {
 
     public User create(User user){
 
-        if( this.usersRepository.findByEmail(user.getEmail())!= null){
-            throw new UserAlreadyExistsException(user.getEmail()+ " User already exists ");
+        if(this.usersRepository.findByEmail(user.getEmail()).isPresent()){
+            throw new UserException(user.getEmail()+ " User already exists ");
         }
         user = user.toBuilder().password(this.passwordEncoder.encode(user.getPassword())).build();
         usersRepository.save(user);
         Wallet wallet = new Wallet(BigDecimal.ZERO, 0L, LocalDateTime.now(),user);
         walletRepository.save(wallet);
-
-        return user ;
+        return user;
     }
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-         userDetails = usersRepository.findByEmail(email);
+        Optional<User> optional = usersRepository.findByEmail(email);
+        UserDetails userDetails = optional.get();;
          return  userDetails;
     }
 }

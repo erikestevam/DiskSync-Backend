@@ -7,6 +7,8 @@ import com.br.integration.domain.entites.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+
+import java.security.Key;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -38,12 +40,13 @@ public class TokenService {
                             .verify(token)
                             .getSubject();
         }catch(JWTVerificationException exception){
-             throw new RuntimeException("Erro ao validar o token: " + exception.getMessage());
+             throw new RuntimeException("Error validating token: " + exception.getMessage());
 
         }
     }
-        private Instant genExpirationDate(){
-            return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
-        }
+    private Instant genExpirationDate(){
+        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    }
+
 
 }

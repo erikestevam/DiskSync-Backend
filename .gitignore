@@ -24,6 +24,3 @@ hs_err_pid*
 replay_pid*
 
 .idea
-integration/src/main/resources/application.yml
-docker-compose.yml
-integration/Dockerfile

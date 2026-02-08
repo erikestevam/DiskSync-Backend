@@ -17,3 +17,8 @@ api:
   security:
     token:
       secret: ${JWT_SECRET}
+
+  spotify:
+    client-id: ${CLIENT_ID}
+    client-secret: ${CLIENT_SECRET}
+    redirect-uri: "http://localhost:8082/callback"

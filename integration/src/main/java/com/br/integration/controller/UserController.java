@@ -3,7 +3,7 @@ package com.br.integration.controller;
 import com.br.integration.domain.dto.AuthDTO;
 import com.br.integration.domain.dto.LoginResponseDTO;
 import com.br.integration.config.security.TokenService;
-import com.br.integration.domain.Exception.UsersExcption.UserAlreadyExistsException;
+import com.br.integration.domain.exception.userexception.UserException;
 import com.br.integration.domain.entites.User;
 import com.br.integration.domain.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +14,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*")
+
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 public class UserController {
         @Autowired
         private AuthenticationManager authenticationManager;
@@ -30,7 +30,7 @@ public class UserController {
                try{
                     usersService.create(user);
                     return  new ResponseEntity<>(HttpStatus.CREATED);
-               }catch(UserAlreadyExistsException e){
+               }catch(UserException e){
                     return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
                }
         }

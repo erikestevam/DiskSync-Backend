@@ -1,6 +1,7 @@
 package com.br.integration.config.security;
 
 
+import com.br.integration.domain.entites.User;
 import com.br.integration.domain.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 
 @Component
@@ -30,17 +32,22 @@ public class SecurityFilter extends OncePerRequestFilter {
         var token = recoverToken(request);
         if (token != null) {
             var login = tokenService.validateToken(token);
-            UserDetails  user = userRepository.findByEmail(login);
-            var authentication = new UsernamePasswordAuthenticationToken(user, null,user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            System.out.println("Login do usuario: " + login);
+            Optional<User> optional = userRepository.findByEmail(login);
+            if (optional.isPresent()) {
+                UserDetails user = optional.get();
+                var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
-    private String recoverToken (HttpServletRequest request){
-        var authHeader = request.getHeader("Authorization");
-        if(authHeader == null) {
-            return null;
+        private String recoverToken (HttpServletRequest request){
+            var authHeader = request.getHeader("Authorization");
+            if (authHeader == null) {
+                return null;
+            }
+            return authHeader.replace("Bearer", "").trim();
         }
-        return authHeader.replace("Bearer","").trim();
+
     }
-}
