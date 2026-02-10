@@ -26,7 +26,9 @@ public class ServerSecurityConfig   {
                         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                          .authorizeHttpRequests(authorize->authorize
                                 .requestMatchers("/user/save","/user/auth").permitAll()
-                                .requestMatchers("user/teste","wallet/mywallet","album/all","album/search","album/{albumid}").authenticated())
+                                .requestMatchers("user/teste","wallet/mywallet","album/all",
+                                                          "album/search","album/{albumid}","user/update/{email}",
+                                                          "user/delete/{email}","user/list").authenticated())
                         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 
 
