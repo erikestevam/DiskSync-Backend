@@ -70,7 +70,7 @@ public class UserService implements UserDetailsService {
             return ResponseEntity.notFound().build();
         }
         User user = usuarioOptional.get();
-        Optional<Wallet> walletOptional =  walletRepository.findByUsers(user);
+        Optional<Wallet> walletOptional =  walletRepository.findByUser(user);
 
         if (walletOptional.isEmpty()) {
             return ResponseEntity.notFound().build();

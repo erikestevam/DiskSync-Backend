@@ -1,44 +1,49 @@
 package com.br.integration.domain.entites;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name="WALLET")
-
+@Table(name = "WALLET")
 public class Wallet {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable= false, nullable = false)
-    private Long Id;
-    @Column(name = "balance")
-    private BigDecimal balance;
-    @Column(name = "points")
-    private Long points;
+    @Column(name = "id", updatable = false, nullable = false)
+    private Long id;
+
+    @Column(name = "balance", nullable = false, precision = 10, scale = 2)
+    private BigDecimal balance = BigDecimal.ZERO;
+
+    @Column(name = "points", nullable = false)
+    private Long points = 0L;
+
     @Column(name = "last_update")
     private LocalDateTime lastUpdate;
+
     @OneToOne
-    @JoinColumn(name = "user_id")
-    private User users;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-
-    public Wallet (){
-
+    public Wallet() {
     }
-    public Wallet(BigDecimal balance, Long points, LocalDateTime lastUpdate, User users) {
-        this.balance = balance;
-        this.points = points;
+
+    public Wallet(BigDecimal balance, Long points, LocalDateTime lastUpdate, User user) {
+        this.balance = balance != null ? balance : BigDecimal.ZERO;
+        this.points = points != null ? points : 0L;
         this.lastUpdate = lastUpdate;
-        this.users = users;
+        this.user = user;
+    }
+
+    public void recharge(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Valor de recarga deve ser positivo");
+        }
+        this.balance = this.balance.add(amount);
+        this.lastUpdate = LocalDateTime.now();
     }
 }
