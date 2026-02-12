@@ -30,7 +30,7 @@ public class ServerSecurityConfig   {
                                                               "wallet/mywallet", "wallet/recharge",
                                                               "album/all","album/{albumid}",
                                                               "user/delete/{email}","user/list",
-                                                              "cart/albums/{email}/{albumId}","cart/{email}",
+                                                              "cart/albums/{albumId}","/cart",
                                                               "order/{id}/status","order/{id}/delivery","order/{id}/received",
                                                               "checkout/{email}/confirm"
                                                                 ).authenticated())

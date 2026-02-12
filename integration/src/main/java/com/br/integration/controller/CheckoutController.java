@@ -18,9 +18,9 @@ public class CheckoutController {
         this.checkoutService = checkoutService;
     }
 
-    @PostMapping("/{email}/confirm")
-    public ResponseEntity<Order> confirmCheckout(@PathVariable String email) {
-        Order order = checkoutService.confirmCheckout(email);
+    @PostMapping("/confirm")
+    public ResponseEntity<Order> confirmCheckout() {
+        Order order = checkoutService.confirmCheckout();  // ← sem parâmetro
         return ResponseEntity.ok(order);
     }
 }

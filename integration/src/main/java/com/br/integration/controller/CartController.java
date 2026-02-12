@@ -18,34 +18,30 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    @PostMapping("/albums/{email}/{albumId}")
-    public ResponseEntity<?> addAlbum(
-            @PathVariable String email,
-            @PathVariable String albumId) {
+    @PostMapping("/albums/{albumId}")
+    public ResponseEntity<?> addAlbum(@PathVariable String albumId) {
         try {
-            CartDTO updatedCart = cartService.addAlbumToCart(email, albumId);
+            CartDTO updatedCart = cartService.addAlbumToCart(albumId);
             return ResponseEntity.status(HttpStatus.CREATED).body(updatedCart);
         } catch (CartException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    @DeleteMapping("/albums/{email}/{albumId}")
-    public ResponseEntity<?> removeAlbum(
-            @PathVariable String email,
-            @PathVariable String albumId) {
+    @DeleteMapping("/albums/{albumId}")
+    public ResponseEntity<?> removeAlbum(@PathVariable String albumId) {
         try {
-            CartDTO updatedCart = cartService.removeAlbumFromCart(email, albumId);
+            CartDTO updatedCart = cartService.removeAlbumFromCart(albumId);
             return ResponseEntity.ok(updatedCart);
         } catch (CartException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    @GetMapping("/{email}")
-    public ResponseEntity<?> getCart(@PathVariable String email) {
+    @GetMapping
+    public ResponseEntity<?> getCart() {
         try {
-            CartDTO cart = cartService.getCart(email);
+            CartDTO cart = cartService.getCart();
             return ResponseEntity.ok(cart);
         } catch (CartException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
