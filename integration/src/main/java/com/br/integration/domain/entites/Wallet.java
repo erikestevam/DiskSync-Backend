@@ -16,11 +16,8 @@ public class Wallet {
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "balance", nullable = false, precision = 10, scale = 2)
+    @Column(name = "balance", nullable = false)
     private BigDecimal balance = BigDecimal.ZERO;
-
-    @Column(name = "points", nullable = false)
-    private Long points = 0L;
 
     @Column(name = "last_update")
     private LocalDateTime lastUpdate;
@@ -34,7 +31,6 @@ public class Wallet {
 
     public Wallet(BigDecimal balance, Long points, LocalDateTime lastUpdate, User user) {
         this.balance = balance != null ? balance : BigDecimal.ZERO;
-        this.points = points != null ? points : 0L;
         this.lastUpdate = lastUpdate;
         this.user = user;
     }

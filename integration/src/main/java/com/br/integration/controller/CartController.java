@@ -2,6 +2,7 @@ package com.br.integration.controller;
 
 import com.br.integration.domain.dto.CartDTO;
 import com.br.integration.domain.Exception.cartException.CartException;
+import com.br.integration.domain.dto.CartTotalDTO;
 import com.br.integration.domain.service.CartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

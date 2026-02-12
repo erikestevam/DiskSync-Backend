@@ -26,9 +26,14 @@ public class ServerSecurityConfig   {
                         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                          .authorizeHttpRequests(authorize->authorize
                                 .requestMatchers("/user/save","/user/auth").permitAll()
-                                .requestMatchers("user/teste","wallet/mywallet", "wallet/recharge","album/all",
-                                                          "album/search","album/{albumid}","user/update/{email}",
-                                                          "user/delete/{email}","user/list", "/cart/**").authenticated())
+                                .requestMatchers(    "user/update/{email}",
+                                                              "wallet/mywallet", "wallet/recharge",
+                                                              "album/all","album/{albumid}",
+                                                              "user/delete/{email}","user/list",
+                                                              "cart/albums/{email}/{albumId}","cart/{email}",
+                                                              "order/{id}/status","order/{id}/delivery","order/{id}/received",
+                                                              "checkout/{email}/confirm"
+                                                                ).authenticated())
                         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 
 

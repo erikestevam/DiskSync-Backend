@@ -24,6 +24,9 @@ public class Cart {
     @Column(name = "album_id")
     private List<String> albumIds = new ArrayList<>();
 
+    @Column(name = "total_value", nullable = false)
+    private Double totalValue = 0.0;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 

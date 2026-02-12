@@ -7,5 +7,5 @@ public record CartDTO(
         String userEmail,
         List<String> albumIds,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
-) {}
+        LocalDateTime updatedAt,
+        Double totalValue) {}
