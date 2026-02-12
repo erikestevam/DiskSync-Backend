@@ -34,10 +34,8 @@ public class Cart {
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     public void addAlbum(String albumId) {
-        if (!albumIds.contains(albumId)) {
-            albumIds.add(albumId);
-            updatedAt = LocalDateTime.now();
-        }
+        albumIds.add(albumId);
+        updatedAt = LocalDateTime.now();
     }
 
     public void removeAlbum(String albumId) {
