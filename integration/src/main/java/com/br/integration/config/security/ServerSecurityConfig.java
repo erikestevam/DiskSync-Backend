@@ -28,7 +28,7 @@ public class ServerSecurityConfig   {
                                 .requestMatchers("/user/save","/user/auth").permitAll()
                                 .requestMatchers("user/teste","wallet/mywallet", "wallet/recharge","album/all",
                                                           "album/search","album/{albumid}","user/update/{email}",
-                                                          "user/delete/{email}","user/list").authenticated())
+                                                          "user/delete/{email}","user/list", "/cart/**").authenticated())
                         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 
 
