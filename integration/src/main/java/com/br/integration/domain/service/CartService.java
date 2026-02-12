@@ -4,6 +4,7 @@ import com.br.integration.domain.dto.CartDTO;
 import com.br.integration.domain.entites.Cart;
 import com.br.integration.domain.Exception.cartException.CartException;
 import com.br.integration.domain.repository.CartRepository;
+import com.br.integration.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,9 +15,11 @@ import java.util.Optional;
 public class CartService {
 
     private final CartRepository cartRepository;
+    private final UserRepository userRepository;
 
-    public CartService(CartRepository cartRepository) {
+    public CartService(CartRepository cartRepository, UserRepository userRepository) {
         this.cartRepository = cartRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -26,6 +29,10 @@ public class CartService {
         }
         if (albumId == null || albumId.trim().isEmpty()) {
             throw new CartException("ID do álbum não pode ser vazio");
+        }
+
+        if (!userRepository.existsByEmail(userEmail)) {
+            throw new CartException("Usuário não encontrado: " + userEmail);
         }
 
         Optional<Cart> optionalCart = cartRepository.findByUserEmail(userEmail);
