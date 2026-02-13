@@ -4,13 +4,17 @@ import com.br.integration.domain.dto.RechargeDTO;
 import com.br.integration.domain.dto.WalletDTO;
 import com.br.integration.domain.entites.Wallet;
 import com.br.integration.domain.exception.walletexception.WalletException;
-import com.br.integration.domain.service.WalletService;
+import com.br.integration.domain.service.walletService.WalletService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
+@Tag(name = "Carteira", description = "Consultar saldo e recarregar carteira do usuário")
 @RestController
 @RequestMapping("/wallet")
 public class WalletController {
@@ -21,8 +25,9 @@ public class WalletController {
         this.walletService = walletService;
     }
 
+    @Operation(summary = "Minha carteira", description = "Retorna o saldo e dados da carteira do usuário (requer Authorization)")
     @GetMapping("/mywallet")
-    public ResponseEntity<?> getMyWallet(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> getMyWallet(@Parameter(description = "Bearer token") @RequestHeader("Authorization") String token) {
         try {
             Wallet wallet = walletService.getWallet(token);
             WalletDTO dto = new WalletDTO(
@@ -35,9 +40,10 @@ public class WalletController {
         }
     }
 
+    @Operation(summary = "Recarregar carteira", description = "Adiciona saldo à carteira do usuário (requer Authorization)")
     @PostMapping("/recharge")
     public ResponseEntity<?> rechargeBalance(
-            @RequestHeader("Authorization") String token,
+            @Parameter(description = "Bearer token") @RequestHeader("Authorization") String token,
             @RequestBody RechargeDTO rechargeDTO) {
 
         if (rechargeDTO == null || rechargeDTO.amount() == null) {

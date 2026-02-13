@@ -3,7 +3,7 @@ package com.br.integration.domain.entites;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
-import com.br.integration.domain.service.state.OrderState;
+import com.br.integration.domain.service.cartService.cartState.OrderState;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

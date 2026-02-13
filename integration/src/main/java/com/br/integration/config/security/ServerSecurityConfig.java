@@ -26,13 +26,14 @@ public class ServerSecurityConfig   {
                         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                          .authorizeHttpRequests(authorize->authorize
                                 .requestMatchers("/user/save","/user/auth").permitAll()
+                                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
                                 .requestMatchers(    "user/update/{email}",
                                                               "wallet/mywallet", "wallet/recharge",
                                                               "album/all","album/{albumid}",
                                                               "user/delete/{email}","user/list",
                                                               "cart/albums/{albumId}","/cart",
-                                                              "order/{id}/status","order/{id}/delivery","order/{id}/received",
-                                                              "checkout/{email}/confirm"
+                                                              "order","order/{id}/status","order/{id}/delivery","order/{id}/received",
+                                                              "checkout/confirm"
                                                                 ).authenticated())
                         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 

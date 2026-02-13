@@ -1,13 +1,16 @@
 package com.br.integration.controller;
 
 import com.br.integration.domain.dto.CartDTO;
-import com.br.integration.domain.Exception.cartException.CartException;
-import com.br.integration.domain.dto.CartTotalDTO;
-import com.br.integration.domain.service.CartService;
+import com.br.integration.domain.exception.cartException.CartException;
+import com.br.integration.domain.service.cartService.CartService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Carrinho", description = "Adicionar, remover álbuns e consultar carrinho do usuário")
 @RestController
 @RequestMapping("/cart")
 public class CartController {
@@ -18,8 +21,9 @@ public class CartController {
         this.cartService = cartService;
     }
 
+    @Operation(summary = "Adicionar álbum ao carrinho", description = "Inclui um álbum no carrinho do usuário autenticado")
     @PostMapping("/albums/{albumId}")
-    public ResponseEntity<?> addAlbum(@PathVariable String albumId) {
+    public ResponseEntity<?> addAlbum(@Parameter(description = "ID do álbum") @PathVariable String albumId) {
         try {
             CartDTO updatedCart = cartService.addAlbumToCart(albumId);
             return ResponseEntity.status(HttpStatus.CREATED).body(updatedCart);
@@ -28,8 +32,9 @@ public class CartController {
         }
     }
 
+    @Operation(summary = "Remover álbum do carrinho", description = "Remove um álbum do carrinho do usuário")
     @DeleteMapping("/albums/{albumId}")
-    public ResponseEntity<?> removeAlbum(@PathVariable String albumId) {
+    public ResponseEntity<?> removeAlbum(@Parameter(description = "ID do álbum") @PathVariable String albumId) {
         try {
             CartDTO updatedCart = cartService.removeAlbumFromCart(albumId);
             return ResponseEntity.ok(updatedCart);
@@ -38,6 +43,7 @@ public class CartController {
         }
     }
 
+    @Operation(summary = "Obter carrinho", description = "Retorna o carrinho do usuário autenticado")
     @GetMapping
     public ResponseEntity<?> getCart() {
         try {
