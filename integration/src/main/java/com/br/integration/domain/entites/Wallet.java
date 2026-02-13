@@ -29,7 +29,7 @@ public class Wallet {
     public Wallet() {
     }
 
-    public Wallet(BigDecimal balance, Long points, LocalDateTime lastUpdate, User user) {
+    public Wallet(BigDecimal balance, LocalDateTime lastUpdate, User user) {
         this.balance = balance != null ? balance : BigDecimal.ZERO;
         this.lastUpdate = lastUpdate;
         this.user = user;

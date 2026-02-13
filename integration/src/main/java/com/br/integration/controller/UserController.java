@@ -1,6 +1,8 @@
 package com.br.integration.controller;
 
 import com.br.integration.domain.dto.AuthDTO;
+import com.br.integration.domain.dto.CreateUserDTO;
+import com.br.integration.domain.dto.UpdateUserDTO;
 import com.br.integration.domain.dto.LoginResponseDTO;
 import com.br.integration.config.security.TokenService;
 import com.br.integration.domain.dto.UserDTO;
@@ -34,9 +36,9 @@ public class UserController {
 
         @Operation(summary = "Criar usuário", description = "Cadastra um novo usuário")
         @PostMapping("/save")
-        public ResponseEntity<?> save(@RequestBody User user){
+        public ResponseEntity<?> save(@RequestBody CreateUserDTO createUserDTO){
                try{
-                    usersService.create(user);
+                    usersService.create(createUserDTO);
                     return  new ResponseEntity<>("Usuário criado com sucesso.", HttpStatus.CREATED);
                }catch(UserException e){
                     return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
@@ -45,9 +47,9 @@ public class UserController {
 
         @Operation(summary = "Atualizar usuário", description = "Atualiza um usuário existente pelo e-mail")
         @PutMapping("update/{email}")
-        public ResponseEntity<?> updateUser(@Parameter(description = "E-mail do usuário") @PathVariable String email, @RequestBody User user) {
+        public ResponseEntity<?> updateUser(@Parameter(description = "E-mail do usuário") @PathVariable String email, @RequestBody UpdateUserDTO updateUserDTO) {
             try {
-                usersService.updateUser(email, user);
+                usersService.updateUser(email, updateUserDTO);
                 return  new ResponseEntity<>("Usuário atualizado com sucesso.", HttpStatus.OK);
             } catch (UserException e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);

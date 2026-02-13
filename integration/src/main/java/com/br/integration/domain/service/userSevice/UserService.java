@@ -1,9 +1,15 @@
 package com.br.integration.domain.service.userSevice;
 
 import com.br.integration.config.security.AuthenticationService;
+import com.br.integration.domain.dto.CreateUserDTO;
+import com.br.integration.domain.dto.UpdateUserDTO;
 import com.br.integration.domain.dto.UserDTO;
+import com.br.integration.domain.entites.Cart;
+import com.br.integration.domain.entites.Order;
 import com.br.integration.domain.entites.User;
 import com.br.integration.domain.entites.Wallet;
+import com.br.integration.domain.repository.CartRepository;
+import com.br.integration.domain.repository.OrderRepository;
 import com.br.integration.domain.repository.UserRepository;
 import com.br.integration.domain.exception.userexception.UserException;
 import com.br.integration.domain.repository.WalletRepository;
@@ -31,23 +37,33 @@ public class UserService implements UserDetailsService {
     private final UserRepository usersRepository;
     @Autowired
     private final WalletRepository walletRepository;
+    @Autowired
+    private final CartRepository cartRepository;
+    @Autowired
+    private final OrderRepository orderRepository;
     private final AuthenticationService authenticationService;
 
     UserDetails userDetails;
     private final PasswordEncoder passwordEncoder;
 
-    public User create(User user){
+    public User create(CreateUserDTO createUserDTO){
 
-        if(this.usersRepository.findByEmail(user.getEmail()).isPresent()){
-            throw new UserException("Email " + user.getEmail() + " já está cadastrado no sistema.");
+        if(this.usersRepository.findByEmail(createUserDTO.email()).isPresent()){
+            throw new UserException("Email " + createUserDTO.email() + " já está cadastrado no sistema.");
         }
-        user = user.toBuilder().password(this.passwordEncoder.encode(user.getPassword())).build();
-        usersRepository.save(user);
-        Wallet wallet = new Wallet(BigDecimal.ZERO, 0L, LocalDateTime.now(),user);
+        
+        User user = User.builder()
+                .name(createUserDTO.name())
+                .email(createUserDTO.email())
+                .password(this.passwordEncoder.encode(createUserDTO.password()))
+                .build();
+        
+        user = usersRepository.save(user);
+        Wallet wallet = new Wallet(BigDecimal.ZERO, LocalDateTime.now(), user);
         walletRepository.save(wallet);
         return user;
     }
-    public User updateUser(String email, User user) {
+    public User updateUser(String email, UpdateUserDTO updateUserDTO) {
         String currentUserEmail = authenticationService.getCurrentUserEmail();
         
         if (!currentUserEmail.equals(email)) {
@@ -57,38 +73,51 @@ public class UserService implements UserDetailsService {
         User existingUser = this.usersRepository.findByEmail(email)
                 .orElseThrow(() -> new UserException("Usuário com email " + email + " não foi encontrado."));
 
-        if(!email.equals(user.getEmail()) && this.usersRepository.findByEmail(user.getEmail()).isPresent()){
-            throw new UserException(user.getEmail() + " já está em uso por outro usuário.");
+        if(!email.equals(updateUserDTO.email()) && this.usersRepository.findByEmail(updateUserDTO.email()).isPresent()){
+            throw new UserException(updateUserDTO.email() + " já está em uso por outro usuário.");
         }
 
-        existingUser.setName(user.getName());
-        existingUser.setEmail(user.getEmail());
-        existingUser.setPassword(user.getPassword());
-        existingUser = existingUser.toBuilder().password(this.passwordEncoder.encode(existingUser.getPassword())).build();
+        existingUser.setName(updateUserDTO.name());
+        existingUser.setEmail(updateUserDTO.email());
+        existingUser = existingUser.toBuilder()
+                .password(this.passwordEncoder.encode(updateUserDTO.password()))
+                .build();
 
         return this.usersRepository.save(existingUser);
     }
 
     public ResponseEntity<?> deleteUser(String email) {
-        String currentUserEmail = authenticationService.getCurrentUserEmail();
+        User user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException("Usuário com email " + email + " não foi encontrado."));
         
+        String currentUserEmail = authenticationService.getCurrentUserEmail();
         if (!currentUserEmail.equals(email)) {
             throw new UserException("Você não tem permissão para deletar este usuário.");
         }
         
-        Optional<User> usuarioOptional = usersRepository.findByEmail(email);
-        if (usuarioOptional.isEmpty()) {
-            throw new UserException("Usuário com email " + email + " não foi encontrado.");
+        log.info("Iniciando exclusão do usuário: {}", email);
+        
+        List<Order> orders = orderRepository.findByUserEmail(email);
+        if (!orders.isEmpty()) {
+            orderRepository.deleteAll(orders);
+            log.info("Deletados {} pedido(s) do usuário {}", orders.size(), email);
         }
-        User user = usuarioOptional.get();
-        Optional<Wallet> walletOptional =  walletRepository.findByUser(user);
-
-        if (walletOptional.isEmpty()) {
-            throw new UserException("Carteira do usuário " + email + " não foi encontrada.");
+        
+        Optional<Cart> cartOptional = cartRepository.findByUserEmail(email);
+        if (cartOptional.isPresent()) {
+            cartRepository.delete(cartOptional.get());
+            log.info("Carrinho do usuário {} deletado", email);
         }
-        Wallet wallet = walletOptional.get();
-        walletRepository.delete(wallet);
+        
+        Optional<Wallet> walletOptional = walletRepository.findByUser(user);
+        if (walletOptional.isPresent()) {
+            walletRepository.delete(walletOptional.get());
+            log.info("Carteira do usuário {} deletada", email);
+        }
+        
         usersRepository.delete(user);
+        log.info("Usuário {} deletado com sucesso", email);
+        
         return ResponseEntity.noContent().build();
     }
     public ResponseEntity<List<UserDTO>> listUsers() {

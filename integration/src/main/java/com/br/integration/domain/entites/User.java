@@ -17,8 +17,8 @@ import java.util.Collection;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "USERS")
 public class User implements UserDetails {

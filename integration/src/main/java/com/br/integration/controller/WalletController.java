@@ -6,7 +6,6 @@ import com.br.integration.domain.entites.Wallet;
 import com.br.integration.domain.exception.walletexception.WalletException;
 import com.br.integration.domain.service.walletService.WalletService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +24,11 @@ public class WalletController {
         this.walletService = walletService;
     }
 
-    @Operation(summary = "Minha carteira", description = "Retorna o saldo e dados da carteira do usuário (requer Authorization)")
+    @Operation(summary = "Minha carteira", description = "Retorna o saldo e dados da carteira do usuário")
     @GetMapping("/mywallet")
-    public ResponseEntity<?> getMyWallet(@Parameter(description = "Bearer token") @RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> getMyWallet() {
         try {
-            Wallet wallet = walletService.getWallet(token);
+            Wallet wallet = walletService.getWallet();
             WalletDTO dto = new WalletDTO(
                     wallet.getBalance(),
                     wallet.getLastUpdate()
@@ -40,11 +39,9 @@ public class WalletController {
         }
     }
 
-    @Operation(summary = "Recarregar carteira", description = "Adiciona saldo à carteira do usuário (requer Authorization)")
+    @Operation(summary = "Recarregar carteira", description = "Adiciona saldo à carteira do usuário")
     @PostMapping("/recharge")
-    public ResponseEntity<?> rechargeBalance(
-            @Parameter(description = "Bearer token") @RequestHeader("Authorization") String token,
-            @RequestBody RechargeDTO rechargeDTO) {
+    public ResponseEntity<?> rechargeBalance(@RequestBody RechargeDTO rechargeDTO) {
 
         if (rechargeDTO == null || rechargeDTO.amount() == null) {
             return ResponseEntity.badRequest().body("O valor da recarga não pode ser vazio");
@@ -54,7 +51,7 @@ public class WalletController {
         }
 
         try {
-            WalletDTO updatedWallet = walletService.rechargeAndReturnDTO(token, rechargeDTO);
+            WalletDTO updatedWallet = walletService.rechargeAndReturnDTO(rechargeDTO);
             return ResponseEntity.ok(updatedWallet);
         } catch (WalletException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
