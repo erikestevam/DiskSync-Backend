@@ -19,8 +19,12 @@ public class CheckoutController {
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<Order> confirmCheckout() {
-        Order order = checkoutService.confirmCheckout();  // ← sem parâmetro
-        return ResponseEntity.ok(order);
+    public ResponseEntity<?> confirmCheckout() {
+        try {
+            Order order = checkoutService.confirmCheckout();
+            return ResponseEntity.ok(order);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

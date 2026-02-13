@@ -33,7 +33,7 @@ public class UserController {
         public ResponseEntity<?> save(@RequestBody User user){
                try{
                     usersService.create(user);
-                    return  new ResponseEntity<>(HttpStatus.CREATED);
+                    return  new ResponseEntity<>("Usuário criado com sucesso.", HttpStatus.CREATED);
                }catch(UserException e){
                     return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
                }
@@ -42,7 +42,7 @@ public class UserController {
         public ResponseEntity<?> updateUser(@PathVariable String email, @RequestBody User user) {
             try {
                 usersService.updateUser(email, user);
-                return  new ResponseEntity<>(HttpStatus.OK);
+                return  new ResponseEntity<>("Usuário atualizado com sucesso.", HttpStatus.OK);
             } catch (UserException e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
             }
@@ -51,7 +51,7 @@ public class UserController {
         public ResponseEntity<?> deleteUser(@PathVariable String email) {
             try {
                 usersService.deleteUser(email);
-                return  new ResponseEntity<>(HttpStatus.OK);
+                return  new ResponseEntity<>("Usuário deletado com sucesso.", HttpStatus.OK);
             } catch (UserException e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
             }

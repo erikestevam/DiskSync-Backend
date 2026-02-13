@@ -14,21 +14,41 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    @GetMapping
+    public ResponseEntity<?> getMyOrders() {
+        try {
+            return ResponseEntity.ok(orderService.getMyOrders());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao buscar pedidos: " + e.getMessage());
+        }
+    }
 
     @GetMapping("/{id}/status")
-    public ResponseEntity<String> getStatus(@PathVariable Long id) {
-        return ResponseEntity.ok(orderService.getStatus(id));
+    public ResponseEntity<?> getStatus(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(orderService.getStatus(id));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao buscar status do pedido: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}/delivery")
-    public ResponseEntity<String> updateToDelivery(@PathVariable Long id) {
-        orderService.updateToDelivery(id);
-        return ResponseEntity.ok("O pedido nº " + id + " já está a caminho para entrega.");
+    public ResponseEntity<?> updateToDelivery(@PathVariable Long id) {
+        try {
+            orderService.updateToDelivery(id);
+            return ResponseEntity.ok("O pedido de numero " + id + " já está a caminho para entrega.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao atualizar pedido: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}/received")
-        public ResponseEntity<String> q(@PathVariable Long id) {
-        orderService.updateToReceived(id);
-        return ResponseEntity.ok("O pedido nº " + id + " foi entregue.");
+        public ResponseEntity<?> q(@PathVariable Long id) {
+        try {
+            orderService.updateToReceived(id);
+            return ResponseEntity.ok("O pedido de numero " + id + " foi entregue.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao atualizar pedido: " + e.getMessage());
+        }
     }
 }

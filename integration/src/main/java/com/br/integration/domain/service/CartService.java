@@ -4,10 +4,8 @@ import com.br.integration.domain.Exception.cartException.CartNotFoundException;
 import com.br.integration.domain.Exception.cartException.InvalidCartOperationException;
 import com.br.integration.domain.dto.CartDTO;
 import com.br.integration.domain.entites.Cart;
-import com.br.integration.domain.entites.User;
 import com.br.integration.domain.repository.CartRepository;
 import com.br.integration.domain.repository.UserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,40 +17,21 @@ public class CartService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
     private final AlbumService albumService;
+    private final AuthenticationService authenticationService;
 
-    public CartService(CartRepository cartRepository, UserRepository userRepository, AlbumService albumService) {
+    public CartService(CartRepository cartRepository, UserRepository userRepository, AlbumService albumService, AuthenticationService authenticationService) {
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
         this.albumService = albumService;
-    }
-
-    private String getCurrentUserEmail() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new InvalidCartOperationException("Usuário não autenticado");
-        }
-
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof User user) {
-            return user.getEmail();
-        }
-
-        // Caso o Spring envolva em UserDetails genérico
-        if (principal instanceof org.springframework.security.core.userdetails.UserDetails details) {
-            return details.getUsername(); // no seu caso, username = email
-        }
-
-        throw new InvalidCartOperationException("Não foi possível identificar o usuário logado");
+        this.authenticationService = authenticationService;
     }
 
     @Transactional
     public CartDTO addAlbumToCart(String albumId) {
-        String userEmail = getCurrentUserEmail();
+        String userEmail = authenticationService.getCurrentUserEmail();
 
         if (albumId == null || albumId.trim().isEmpty()) {
-            throw new InvalidCartOperationException("ID do álbum não pode ser vazio");
+            throw new InvalidCartOperationException("ID do álbum não pode ser vazio.");
         }
 
         if (!userRepository.existsByEmail(userEmail)) {
@@ -68,17 +47,13 @@ public class CartService {
                     return newCart;
                 });
 
-        if (cart.getAlbumIds().contains(albumId)) {
-            throw new InvalidCartOperationException("Álbum já está no carrinho");
-        }
-
         cart.addAlbum(albumId);
 
         try {
             double albumPrice = albumService.getAlbumId(albumId).getBody().price();
             cart.setTotalValue(cart.getTotalValue() + albumPrice);
-        } catch (Exception e) {  // JsonProcessingException ou outras
-            throw new InvalidCartOperationException("Erro ao obter preço do álbum: " + albumId);
+        } catch (Exception e) {
+            throw new InvalidCartOperationException("Erro ao buscar informações do álbum.");
         }
 
         cart.setUpdatedAt(LocalDateTime.now());
@@ -95,20 +70,20 @@ public class CartService {
 
     @Transactional
     public CartDTO removeAlbumFromCart(String albumId) {
-        String userEmail = getCurrentUserEmail();
+        String userEmail = authenticationService.getCurrentUserEmail();
 
         Cart cart = cartRepository.findByUserEmail(userEmail)
                 .orElseThrow(() -> new CartNotFoundException("Carrinho não encontrado para o usuário logado"));
 
         if (!cart.getAlbumIds().remove(albumId)) {
-            throw new InvalidCartOperationException("Álbum não encontrado no carrinho");
+            throw new InvalidCartOperationException("Álbum não encontrado no seu carrinho.");
         }
 
         try {
             double albumPrice = albumService.getAlbumId(albumId).getBody().price();
             cart.setTotalValue(cart.getTotalValue() - albumPrice);
         } catch (Exception e) {
-            throw new InvalidCartOperationException("Erro ao recalcular preço do álbum: " + albumId);
+            throw new InvalidCartOperationException("Erro ao recalcular o valor do carrinho.");
         }
 
         cart.setUpdatedAt(LocalDateTime.now());
@@ -124,7 +99,7 @@ public class CartService {
     }
 
     public CartDTO getCart() {
-        String userEmail = getCurrentUserEmail();
+        String userEmail = authenticationService.getCurrentUserEmail();
 
         Cart cart = cartRepository.findByUserEmail(userEmail)
                 .orElseThrow(() -> new CartNotFoundException("Carrinho não encontrado para o usuário logado"));

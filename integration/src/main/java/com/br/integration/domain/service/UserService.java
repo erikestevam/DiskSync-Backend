@@ -33,6 +33,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository usersRepository;
     @Autowired
     private final WalletRepository walletRepository;
+    private final AuthenticationService authenticationService;
 
     UserDetails userDetails;
     private final PasswordEncoder passwordEncoder;
@@ -40,7 +41,7 @@ public class UserService implements UserDetailsService {
     public User create(User user){
 
         if(this.usersRepository.findByEmail(user.getEmail()).isPresent()){
-            throw new UserException(user.getEmail()+ " User already exists ");
+            throw new UserException("Email " + user.getEmail() + " já está cadastrado no sistema.");
         }
         user = user.toBuilder().password(this.passwordEncoder.encode(user.getPassword())).build();
         usersRepository.save(user);
@@ -49,12 +50,18 @@ public class UserService implements UserDetailsService {
         return user;
     }
     public User updateUser(String email, User user) {
-
-        if(this.usersRepository.findByEmail(user.getEmail()).isPresent()){
-            throw new UserException(user.getEmail()+ "Email já está em uso por um usuário!");
+        String currentUserEmail = authenticationService.getCurrentUserEmail();
+        
+        if (!currentUserEmail.equals(email)) {
+            throw new UserException("Você não tem permissão para alterar este usuário.");
         }
+
         User existingUser = this.usersRepository.findByEmail(email)
-                .orElseThrow(() -> new UserException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserException("Usuário com email " + email + " não foi encontrado."));
+
+        if(!email.equals(user.getEmail()) && this.usersRepository.findByEmail(user.getEmail()).isPresent()){
+            throw new UserException(user.getEmail() + " já está em uso por outro usuário.");
+        }
 
         existingUser.setName(user.getName());
         existingUser.setEmail(user.getEmail());
@@ -65,15 +72,21 @@ public class UserService implements UserDetailsService {
     }
 
     public ResponseEntity<?> deleteUser(String email) {
+        String currentUserEmail = authenticationService.getCurrentUserEmail();
+        
+        if (!currentUserEmail.equals(email)) {
+            throw new UserException("Você não tem permissão para deletar este usuário.");
+        }
+        
         Optional<User> usuarioOptional = usersRepository.findByEmail(email);
         if (usuarioOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw new UserException("Usuário com email " + email + " não foi encontrado.");
         }
         User user = usuarioOptional.get();
         Optional<Wallet> walletOptional =  walletRepository.findByUser(user);
 
         if (walletOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw new UserException("Carteira do usuário " + email + " não foi encontrada.");
         }
         Wallet wallet = walletOptional.get();
         walletRepository.delete(wallet);

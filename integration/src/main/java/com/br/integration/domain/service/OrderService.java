@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final AuthenticationService authenticationService;
 
     @Transactional
     public Order createOrder(String email, java.util.List<String> albumIds, Double totalValue) {
@@ -35,8 +36,14 @@ public class OrderService {
 
     @Transactional
     public void updateToDelivery(Long id) {
+        String currentUserEmail = authenticationService.getCurrentUserEmail();
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
+        
+        if (!order.getUserEmail().equals(currentUserEmail)) {
+            throw new InvalidOrderStateException("Você não tem permissão para alterar este pedido.");
+        }
+        
         reconstituteState(order);
         try {
             order.startDelivery();
@@ -48,8 +55,14 @@ public class OrderService {
 
     @Transactional
     public void updateToReceived(Long id) {
+        String currentUserEmail = authenticationService.getCurrentUserEmail();
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
+        
+        if (!order.getUserEmail().equals(currentUserEmail)) {
+            throw new InvalidOrderStateException("Você não tem permissão para alterar este pedido.");
+        }
+        
         reconstituteState(order);
         try {
             order.confirmReceipt();
@@ -60,9 +73,20 @@ public class OrderService {
     }
 
     public String getStatus(Long id) {
+        String currentUserEmail = authenticationService.getCurrentUserEmail();
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
+        
+        if (!order.getUserEmail().equals(currentUserEmail)) {
+            throw new InvalidOrderStateException("Você não tem permissão para visualizar este pedido.");
+        }
+        
         return order.getStatus();
+    }
+
+    public java.util.List<Order> getMyOrders() {
+        String currentUserEmail = authenticationService.getCurrentUserEmail();
+        return orderRepository.findByUserEmail(currentUserEmail);
     }
 
     private void reconstituteState(Order order) {
