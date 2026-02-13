@@ -32,7 +32,7 @@ public class Order {
     private List<String> albumIds = new ArrayList<>();
 
     @Column(name = "total_value", nullable = false)
-    private Double totalValue; // valor total do pedido
+    private Double totalValue; 
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
